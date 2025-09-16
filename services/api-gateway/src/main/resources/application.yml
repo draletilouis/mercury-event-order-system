@@ -3,10 +3,61 @@ server:
 
 spring:
   application:
-    name: api-gateway
+    name: api-gateway-service
+  
+  cloud:
+    gateway:
+      routes:
+        - id: orders-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/orders/**
+          filters:
+            - StripPrefix=2
+        - id: payments-service
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/payments/**
+          filters:
+            - StripPrefix=2
+        - id: inventory-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/inventory/**
+          filters:
+            - StripPrefix=2
+  
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 2000ms
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+  tracing:
+    enabled: true
+  otlp:
+    tracing:
+      endpoint: ${OTLP_ENDPOINT:http://localhost:4317}
+
+logging:
+  level:
+    com.mercury.orders: INFO
+    org.springframework.cloud.gateway: INFO
+
+app:
+  version: 0.1.0
+  idempotency:
+    key-header: X-Idempotency-Key
+    ttl-hours: 24

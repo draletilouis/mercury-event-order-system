@@ -1,0 +1,196 @@
+version: '3.8'
+
+services:
+  # Infrastructure Services
+  postgres:
+    image: postgres:15-alpine
+    container_name: mercury-postgres
+    environment:
+      POSTGRES_DB: mercury_orders
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql
+    networks:
+      - mercury-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: mercury-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - mercury-network
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    container_name: mercury-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - mercury-network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: mercury-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    networks:
+      - mercury-network
+
+  # Observability Stack
+  jaeger:
+    image: jaegertracing/all-in-one:1.50
+    container_name: mercury-jaeger
+    ports:
+      - "16686:16686"
+      - "14250:14250"
+    environment:
+      COLLECTOR_OTLP_ENABLED: true
+    networks:
+      - mercury-network
+
+  prometheus:
+    image: prom/prometheus:v2.45.0
+    container_name: mercury-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - mercury-network
+
+  grafana:
+    image: grafana/grafana:10.1.0
+    container_name: mercury-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    networks:
+      - mercury-network
+
+  # Application Services
+  api-gateway:
+    build:
+      context: .
+      dockerfile: services/api-gateway/Dockerfile
+    container_name: mercury-api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      OTLP_ENDPOINT: http://jaeger:14250
+    depends_on:
+      - redis
+      - jaeger
+    networks:
+      - mercury-network
+
+  orders-service:
+    build:
+      context: .
+      dockerfile: services/orders/Dockerfile
+    container_name: mercury-orders-service
+    ports:
+      - "8082:8082"
+    environment:
+      DB_USERNAME: orders_user
+      DB_PASSWORD: orders_pass
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      OTLP_ENDPOINT: http://jaeger:14250
+    depends_on:
+      - postgres
+      - redis
+      - kafka
+      - jaeger
+    networks:
+      - mercury-network
+
+  payments-service:
+    build:
+      context: .
+      dockerfile: services/payments/Dockerfile
+    container_name: mercury-payments-service
+    ports:
+      - "8083:8083"
+    environment:
+      DB_USERNAME: payments_user
+      DB_PASSWORD: payments_pass
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      OTLP_ENDPOINT: http://jaeger:14250
+    depends_on:
+      - postgres
+      - redis
+      - kafka
+      - jaeger
+    networks:
+      - mercury-network
+
+  inventory-service:
+    build:
+      context: .
+      dockerfile: services/inventory/Dockerfile
+    container_name: mercury-inventory-service
+    ports:
+      - "8081:8081"
+    environment:
+      DB_USERNAME: inventory_user
+      DB_PASSWORD: inventory_pass
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      OTLP_ENDPOINT: http://jaeger:14250
+    depends_on:
+      - postgres
+      - redis
+      - kafka
+      - jaeger
+    networks:
+      - mercury-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  kafka_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  mercury-network:
+    driver: bridge
+
+

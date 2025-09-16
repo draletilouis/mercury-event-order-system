@@ -4,6 +4,7 @@ plugins {
     kotlin("plugin.jpa") version "2.0.21" apply false
     id("org.springframework.boot") version "3.3.4" apply false
     id("io.spring.dependency-management") version "1.1.6" apply false
+    id("com.google.cloud.tools.jib") version "3.4.0" apply false
 }
 
 allprojects {
@@ -43,6 +44,7 @@ subprojects {
         imports {
             mavenBom("org.springframework.boot:spring-boot-dependencies:3.3.4")
             mavenBom("org.springframework.cloud:spring-cloud-dependencies:2023.0.3")
+            mavenBom("org.springframework.kafka:spring-kafka-dependencies:3.1.4")
         }
     }
 
