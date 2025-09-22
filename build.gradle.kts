@@ -44,7 +44,6 @@ subprojects {
         imports {
             mavenBom("org.springframework.boot:spring-boot-dependencies:3.3.4")
             mavenBom("org.springframework.cloud:spring-cloud-dependencies:2023.0.3")
-            mavenBom("org.springframework.kafka:spring-kafka-dependencies:3.1.4")
         }
     }
 

@@ -23,3 +23,34 @@ interface PaymentRepository : JpaRepository<Payment, UUID> {
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

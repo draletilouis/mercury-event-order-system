@@ -36,7 +36,7 @@ class PaymentService(
                 val authorizedPayment = savedPayment.transitionTo(PaymentStatus.AUTHORIZED)
                 paymentEventPublisher.publishPaymentAuthorized(
                     orderId = orderId,
-                    paymentId = savedPayment.id,
+                    paymentId = savedPayment.id.toString(),
                     authorizedAmount = amount
                 )
                 tracingMetrics.incrementPaymentAuthorized()
@@ -46,7 +46,7 @@ class PaymentService(
                 val declinedPayment = savedPayment.transitionTo(PaymentStatus.DECLINED)
                 paymentEventPublisher.publishPaymentDeclined(
                     orderId = orderId,
-                    paymentId = savedPayment.id,
+                    paymentId = savedPayment.id.toString(),
                     reason = authorizationResult.reason ?: "Payment declined",
                     declinedAmount = amount
                 )
@@ -71,7 +71,7 @@ class PaymentService(
         
         paymentEventPublisher.publishPaymentReversed(
             orderId = payment.orderId,
-            paymentId = paymentId,
+            paymentId = paymentId.toString(),
             reversedAmount = payment.amount
         )
         
@@ -113,5 +113,30 @@ class PaymentService(
         val reason: String? = null
     )
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
