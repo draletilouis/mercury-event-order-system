@@ -96,12 +96,6 @@ To run with a Spring profile (e.g., dev):
 ./gradlew :services:orders:bootRun -Dspring.profiles.active=dev
 ```
 
-WSL helper scripts are also provided:
-```bash
-./run-orders-wsl.sh          # starts local dev stack for orders
-./run-orders-tests-wsl.sh    # runs orders tests in WSL
-```
-
 ## 📡 API Endpoints
 
 ### API Gateway (Port 8080)
@@ -263,9 +257,7 @@ Each service has its own `application.yml` with:
 ## 📚 Additional Documentation
 
 - [Database Schema](docs/database-schema.md)
-- [API Documentation](docs/api-documentation.md)
-- [Deployment Guide](docs/deployment.md)
-- [Monitoring Setup](docs/monitoring.md)
+- [Monitoring stack configuration](monitoring/)
 
 ## 🤝 Contributing
 

@@ -26,6 +26,7 @@ Run with profile:
 
 ## API
 - Actuator Health: `GET http://localhost:8083/actuator/health`
+- Metrics: `GET http://localhost:8083/actuator/prometheus`
 
 ## Events
 - Publishes: `PaymentAuthorized`, `PaymentDeclined`, `PaymentReversed`
@@ -33,7 +34,7 @@ Run with profile:
 
 ## Configuration
 - DB/Kafka/Redis configured in `src/main/resources/application.yml`
-- Common env vars: `DB_*`, `KAFKA_BOOTSTRAP_SERVERS`, `REDIS_HOST`, `SPRING_PROFILES_ACTIVE`
+- Common env vars: `DB_*`, `KAFKA_BOOTSTRAP_SERVERS`, `REDIS_HOST`, `SPRING_PROFILES_ACTIVE`, `OTLP_ENDPOINT`
 
 ## Docker
 ```bash

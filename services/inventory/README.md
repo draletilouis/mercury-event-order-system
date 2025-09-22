@@ -21,6 +21,7 @@ Run with profile:
 
 ## API
 - Health: `GET http://localhost:8081/actuator/health`
+- Metrics: `GET http://localhost:8081/actuator/prometheus`
 
 ## Events
 - Publishes: `InventoryReserved`, `InventoryInsufficient`, `InventoryReleased`

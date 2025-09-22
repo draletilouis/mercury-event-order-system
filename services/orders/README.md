@@ -56,8 +56,11 @@ docker-compose up -d postgres redis kafka zookeeper jaeger
 
 #### Option 2: Using WSL (Development)
 ```bash
-# Use the provided WSL script with H2 in-memory database
-./run-orders-wsl.sh
+# Launch infra quickly (optional if using full compose)
+docker-compose up -d postgres redis kafka zookeeper jaeger
+
+# Run the Orders Service
+./gradlew :services:orders:bootRun
 ```
 
 #### Option 3: Full Docker Environment
@@ -76,6 +79,11 @@ The service supports multiple configuration profiles:
 - **`dev`**: Development configuration with enhanced logging
 - **`test`**: Test configuration with H2 in-memory database
 - **`prod`**: Production configuration with optimizations
+
+Profile selection:
+```bash
+./gradlew :services:orders:bootRun -Dspring.profiles.active=dev
+```
 
 ### WSL Tips
 - Build inside WSL at `/mnt/c/...` path to avoid Windows file lock issues.
@@ -140,8 +148,7 @@ CANCELLED     CANCELLED        CANCELLED
 ## 🔌 API Endpoints
 
 ### Health & Monitoring
-- `GET /api/v1/health` - Health check endpoint
-- `GET /api/v1/actuator/health` - Detailed health information
+- `GET /api/v1/actuator/health` - Health check endpoint
 - `GET /api/v1/actuator/metrics` - Application metrics
 - `GET /api/v1/actuator/prometheus` - Prometheus metrics
 
@@ -323,7 +330,7 @@ docker run -p 8082:8082 \
   mercury-orders-service
 ```
 
-### Kubernetes Deployment
+### Kubernetes Deployment (example)
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
