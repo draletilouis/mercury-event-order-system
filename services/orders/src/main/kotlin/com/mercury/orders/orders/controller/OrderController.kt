@@ -2,7 +2,7 @@ package com.mercury.orders.orders.controller
 
 import com.mercury.orders.orders.domain.Order
 import com.mercury.orders.orders.domain.OrderStatus
-import com.mercury.orders.orders.service.CreateOrderRequest
+import com.mercury.orders.orders.dto.*
 import com.mercury.orders.orders.service.OrderService
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
@@ -68,13 +68,5 @@ class OrderController(
         }
     }
 }
-
-data class UpdateOrderStatusRequest(
-    val status: OrderStatus
-)
-
-data class CancelOrderRequest(
-    val reason: String
-)
 
 

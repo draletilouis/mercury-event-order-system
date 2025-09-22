@@ -11,6 +11,7 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/common" />
             <option value="$PROJECT_DIR$/common/common-events" />
+            <option value="$PROJECT_DIR$/common/common-tracing" />
             <option value="$PROJECT_DIR$/services" />
             <option value="$PROJECT_DIR$/services/api-gateway" />
             <option value="$PROJECT_DIR$/services/inventory" />

@@ -5,6 +5,7 @@ import com.mercury.orders.events.DomainEvent
 import com.mercury.orders.orders.domain.OutboxEventEntity
 import com.mercury.orders.orders.repository.OutboxEventRepository
 import com.mercury.orders.tracing.TracingMetrics
+import org.springframework.data.domain.PageRequest
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
@@ -22,8 +23,11 @@ class OrderOutboxPublisher(
     @Scheduled(fixedDelayString = "\${app.outbox.polling-interval:5000}")
     @Transactional
     fun publishPendingEvents() {
+        val batchSize = 100 // configurable via application.yml
+        val pageable = PageRequest.of(0, batchSize)
         val pendingEvents = outboxEventRepository.findByStatusOrderByCreatedAtAsc(
-            com.mercury.orders.events.OutboxEventStatus.PENDING
+            com.mercury.orders.events.OutboxEventStatus.PENDING,
+            pageable
         )
         
         pendingEvents.forEach { event ->
@@ -124,5 +128,11 @@ class OrderOutboxPublisher(
         }
     }
 }
+
+
+
+
+
+
 
 

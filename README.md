@@ -42,8 +42,9 @@ If any step fails:
 - Docker and Docker Compose
 - JDK 17+
 - Gradle 8+
+- Optional for WSL users: `libudev-dev` and `lsb-release` for cleaner system info (warnings are harmless if missing)
 
-### Quick Start
+### Quick Start (WSL-friendly)
 
 1. **Clone the repository**
    ```bash
@@ -58,7 +59,10 @@ If any step fails:
 
 3. **Build and run services**
    ```bash
-   ./gradlew build
+   # From a WSL terminal
+   ./gradlew clean build
+
+   # Run all services via Docker Compose (recommended for local integration)
    docker-compose up -d api-gateway orders-service payments-service inventory-service
    ```
 
@@ -67,15 +71,17 @@ If any step fails:
    curl http://localhost:8080/actuator/health
    ```
 
-### Development Mode
+### Development Mode (WSL / Gradle)
 
 Run services individually for development:
 
 ```bash
+# In a WSL terminal at repository root
+
 # Terminal 1 - Orders Service
 ./gradlew :services:orders:bootRun
 
-# Terminal 2 - Payments Service  
+# Terminal 2 - Payments Service
 ./gradlew :services:payments:bootRun
 
 # Terminal 3 - Inventory Service
@@ -83,6 +89,17 @@ Run services individually for development:
 
 # Terminal 4 - API Gateway
 ./gradlew :services:api-gateway:bootRun
+```
+
+To run with a Spring profile (e.g., dev):
+```bash
+./gradlew :services:orders:bootRun -Dspring.profiles.active=dev
+```
+
+WSL helper scripts are also provided:
+```bash
+./run-orders-wsl.sh          # starts local dev stack for orders
+./run-orders-tests-wsl.sh    # runs orders tests in WSL
 ```
 
 ## 📡 API Endpoints
@@ -180,6 +197,21 @@ ab -n 1000 -c 10 -H "Content-Type: application/json" \
 docker-compose up -d
 ```
 
+Build individual images locally:
+```bash
+# Orders
+docker build -f services/orders/Dockerfile -t mercury-orders-service .
+
+# Payments
+docker build -f services/payments/Dockerfile -t mercury-payments-service .
+
+# Inventory
+docker build -f services/inventory/Dockerfile -t mercury-inventory-service .
+
+# API Gateway
+docker build -f services/api-gateway/Dockerfile -t mercury-api-gateway .
+```
+
 ### Kubernetes
 ```bash
 kubectl apply -f k8s/
@@ -234,3 +266,20 @@ For questions and support:
 - Create an issue in the repository
 - Check the documentation in the `docs/` folder
 - Review the health endpoints for service status
+
+---
+
+## 🧰 Troubleshooting (WSL/Windows)
+
+- Did not find udev library / File not found: `/etc/lsb-release`:
+  - Harmless in WSL. Optionally install: `sudo apt-get update && sudo apt-get install -y libudev-dev lsb-release`.
+- Gradle daemon crashes or file-lock issues on Windows:
+  - Retry with `./gradlew clean build --no-daemon` inside WSL.
+  - Ensure the project is built from WSL path (`/mnt/c/...`) and not from Windows PowerShell at the same time.
+- Kafka/Redis/Postgres connection refused:
+  - Ensure `docker-compose ps` shows containers healthy and ports exposed.
+  - Check service `application.yml` hosts/ports match compose (usually `localhost` in WSL).
+- Ports already in use:
+  - Stop conflicting processes or change service ports in `application-*.yml`.
+- Database migrations fail:
+  - Confirm DB containers are up; re-run `./gradlew :services:<svc>:bootRun` after infra is ready.
