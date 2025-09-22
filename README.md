@@ -153,6 +153,25 @@ The system uses Apache Kafka for event-driven communication:
 - `PaymentAuthorized`, `PaymentDeclined`, `PaymentReversed`
 - `InventoryReserved`, `InventoryInsufficient`, `InventoryReleased`
 
+## 🔍 Read Models and Replay
+
+The Orders service maintains a separate query-optimized read model that is updated by event handlers and can be fully rebuilt via replay.
+
+- Read model table: `order_read_model` (denormalized by `orderId`, includes `customerId`, `status`, `totalAmount`, `currency`, `lastEventType`, timestamps)
+- Event-driven projector updates the read model from Kafka topics: `order-events`, `payment-events`, `inventory-events`
+- Admin replay trigger rebuilds the read model from earliest offsets
+
+Replay trigger:
+
+```bash
+curl -X POST http://localhost:8082/api/v1/admin/read-model/replay
+```
+
+Notes:
+- Uses a unique consumer group (does not disturb live consumers)
+- Idempotent upserts ensure safe reprocessing
+- Consider pausing read-model consumers during maintenance for consistent rebuilds
+
 ## 🏗️ Project Structure
 
 ```
