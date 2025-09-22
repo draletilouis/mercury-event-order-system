@@ -56,3 +56,5 @@ CMD ["java", "-jar", "services/payments/build/libs/payments-0.1.0.jar"]
 
 
 
+
+

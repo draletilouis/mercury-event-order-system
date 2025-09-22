@@ -56,3 +56,5 @@ CMD ["java", "-jar", "services/inventory/build/libs/inventory-0.1.0.jar"]
 
 
 
+
+
