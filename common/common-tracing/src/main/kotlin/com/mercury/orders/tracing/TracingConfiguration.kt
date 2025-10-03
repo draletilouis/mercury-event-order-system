@@ -5,10 +5,10 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
-class TracingConfiguration {
+open class TracingConfiguration {
 
     @Bean
-    fun tracingMetrics(meterRegistry: MeterRegistry): TracingMetrics {
+    open fun tracingMetrics(meterRegistry: MeterRegistry): TracingMetrics {
         return TracingMetrics(meterRegistry)
     }
 }

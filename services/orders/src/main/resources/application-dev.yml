@@ -1,0 +1,80 @@
+server:
+  port: 8082
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/orders_db
+    username: orders_user
+    password: orders_pass
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        jdbc:
+          batch_size: 10
+  
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    validate-on-migrate: true
+  
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: orders-service-dev
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+    producer:
+      acks: 1
+      retries: 1
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+  tracing:
+    enabled: true
+  otlp:
+    tracing:
+      endpoint: http://localhost:4317
+
+logging:
+  level:
+    com.mercury.orders: DEBUG
+    org.springframework.kafka: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.springframework.web: DEBUG
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level [%X{traceId},%X{spanId}] %logger{36} - %msg%n"
+
+app:
+  version: 0.1.0-dev
+  outbox:
+    polling-interval: 2000
+    retry-interval: 10000
+    cleanup-interval: 600000
+    max-retries: 3
+    batch-size: 50
+  
+  business:
+    max-order-value: 100000.00
+    max-items-per-order: 50
+    max-quantity-per-item: 100
