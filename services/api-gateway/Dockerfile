@@ -58,3 +58,10 @@ CMD ["java", "-jar", "services/api-gateway/build/libs/api-gateway-0.1.0.jar"]
 
 
 
+
+
+
+
+
+
+
