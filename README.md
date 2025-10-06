@@ -6,7 +6,7 @@ A comprehensive microservices-based order management system built with Kotlin, S
 
 The Mercury Order System implements a distributed saga pattern with the following microservices:
 
-- **API Gateway** (Port 8080) - Front door with idempotency and routing
+- **API Gateway** (Port 8080) - Front door with routing, rate limiting, health checks, and request logging
 - **Orders Service** (Port 8082) - Order lifecycle management
 - **Payments Service** (Port 8083) - Payment authorization and processing
 - **Inventory Service** (Port 8081) - Stock reservation and management
@@ -68,7 +68,11 @@ If any step fails:
 
 4. **Verify the system**
    ```bash
-   curl http://localhost:8080/actuator/health
+   # Check API Gateway health
+   curl http://localhost:8080/health
+   
+   # Check all services via API Gateway
+   curl http://localhost:8080/health/ready
    ```
 
 ### Development Mode (WSL / Gradle)
@@ -99,10 +103,15 @@ To run with a Spring profile (e.g., dev):
 ## 📡 API Endpoints
 
 ### API Gateway (Port 8080)
-- `GET /api/orders/{orderId}` - Get order details
-- `POST /api/orders` - Create new order
-- `GET /api/orders/customer/{customerId}` - Get customer orders
-- `POST /api/orders/{orderId}/cancel` - Cancel order
+- `GET /health` - Health check endpoint
+- `GET /health/ready` - Readiness probe
+- `GET /health/live` - Liveness probe
+- `GET /api/orders/{orderId}` - Get order details (routed to Orders service)
+- `POST /api/orders` - Create new order (routed to Orders service)
+- `GET /api/orders/customer/{customerId}` - Get customer orders (routed to Orders service)
+- `POST /api/orders/{orderId}/cancel` - Cancel order (routed to Orders service)
+- `GET /api/payments/{paymentId}` - Get payment details (routed to Payments service)
+- `GET /api/inventory/{sku}` - Get inventory details (routed to Inventory service)
 
 ### Direct Service Access
 - **Orders**: http://localhost:8082
@@ -132,6 +141,41 @@ All services expose health endpoints:
 - `/actuator/health` - Service health status
 - `/actuator/metrics` - Application metrics
 - `/actuator/prometheus` - Prometheus metrics
+
+## 🌐 API Gateway Features
+
+The API Gateway provides enterprise-grade capabilities:
+
+### **Routing & Load Balancing**
+- Intelligent routing to backend services
+- Load balancing across service instances
+- Path-based routing with strip prefix
+
+### **Rate Limiting**
+- Redis-based rate limiting (10 req/sec, burst of 20)
+- Multiple rate limiting strategies:
+  - IP-based limiting
+  - User-Agent + IP combination
+  - User ID-based limiting (for authenticated users)
+
+### **Health Monitoring**
+- Health check endpoint (`/health`)
+- Readiness probe (`/health/ready`) for Kubernetes
+- Liveness probe (`/health/live`) for container orchestration
+
+### **Request Logging**
+- Comprehensive request/response logging
+- Performance timing metrics
+- Error tracking and monitoring
+
+### **CORS Support**
+- Pre-configured for frontend applications
+- Configurable allowed origins, methods, and headers
+
+### **Observability**
+- Prometheus metrics integration
+- OpenTelemetry distributed tracing
+- Request correlation IDs
 
 ## 🔄 Event Flow
 
@@ -166,6 +210,19 @@ Notes:
 - Idempotent upserts ensure safe reprocessing
 - Consider pausing read-model consumers during maintenance for consistent rebuilds
 
+## 📊 Service Status
+
+| Service | Status | Port | Features |
+|---------|--------|------|----------|
+| **API Gateway** | ✅ **Fully Functional** | 8080 | Routing, Rate Limiting, Health Checks, Logging |
+| **Orders Service** | ✅ **Fully Functional** | 8082 | Event Sourcing, Read Models, Saga Management |
+| **Payments Service** | 🟡 **Partial** | 8083 | Domain Model, Event Handling (needs API layer) |
+| **Inventory Service** | 🟡 **Partial** | 8081 | Domain Model, Metrics (needs API layer) |
+
+### **Legend**
+- ✅ **Fully Functional**: Complete with API, business logic, and testing
+- 🟡 **Partial**: Core functionality implemented, needs API layer completion
+
 ## 🏗️ Project Structure
 
 ```
@@ -174,10 +231,10 @@ mercury-order-system/
 │   ├── common-events/          # Shared event definitions
 │   └── common-tracing/         # OpenTelemetry configuration
 ├── services/
-│   ├── api-gateway/           # API Gateway service
-│   ├── orders/                # Orders service
-│   ├── payments/              # Payments service
-│   └── inventory/             # Inventory service
+│   ├── api-gateway/           # ✅ API Gateway service (fully functional)
+│   ├── orders/                # ✅ Orders service (fully functional)
+│   ├── payments/              # 🟡 Payments service (partial)
+│   └── inventory/             # 🟡 Inventory service (partial)
 ├── docs/                      # Documentation
 ├── scripts/                   # Database initialization
 ├── monitoring/                # Observability configs
@@ -282,11 +339,14 @@ For questions and support:
 
 ## 🧰 Troubleshooting (WSL/Windows)
 
+### **General Issues**
 - Did not find udev library / File not found: `/etc/lsb-release`:
   - Harmless in WSL. Optionally install: `sudo apt-get update && sudo apt-get install -y libudev-dev lsb-release`.
 - Gradle daemon crashes or file-lock issues on Windows:
   - Retry with `./gradlew clean build --no-daemon` inside WSL.
   - Ensure the project is built from WSL path (`/mnt/c/...`) and not from Windows PowerShell at the same time.
+
+### **Infrastructure Issues**
 - Kafka/Redis/Postgres connection refused:
   - Ensure `docker-compose ps` shows containers healthy and ports exposed.
   - Check service `application.yml` hosts/ports match compose (usually `localhost` in WSL).
@@ -294,3 +354,17 @@ For questions and support:
   - Stop conflicting processes or change service ports in `application-*.yml`.
 - Database migrations fail:
   - Confirm DB containers are up; re-run `./gradlew :services:<svc>:bootRun` after infra is ready.
+
+### **API Gateway Issues**
+- API Gateway won't start:
+  - Check Redis connectivity: `telnet localhost 6379`
+  - Verify port 8080 is available: `netstat -ano | findstr :8080`
+- Rate limiting not working:
+  - Ensure Redis is running and accessible
+  - Check rate limit configuration in `application.yml`
+- Service routing failures:
+  - Verify backend services are running on correct ports
+  - Check routing configuration in gateway `application.yml`
+- Health checks failing:
+  - Test individual service health endpoints
+  - Review gateway health controller logs
