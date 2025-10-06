@@ -7,6 +7,12 @@ spring:
   
   cloud:
     gateway:
+      default-filters:
+        - name: RequestRateLimiter
+          args:
+            key-resolver: "#{@clientIdKeyResolver}"
+            redis-rate-limiter.replenishRate: 10
+            redis-rate-limiter.burstCapacity: 20
       routes:
         - id: orders-service
           uri: http://localhost:8082
@@ -26,6 +32,13 @@ spring:
             - Path=/api/inventory/**
           filters:
             - StripPrefix=2
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:3000"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+            allowCredentials: true
   
   data:
     redis:

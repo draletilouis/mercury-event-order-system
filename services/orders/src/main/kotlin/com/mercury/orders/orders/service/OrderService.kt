@@ -3,6 +3,7 @@ package com.mercury.orders.orders.service
 import com.mercury.orders.orders.domain.Order
 import com.mercury.orders.orders.domain.OrderItem
 import com.mercury.orders.orders.domain.OrderStatus
+import com.mercury.orders.orders.dto.CreateOrderRequest
 import com.mercury.orders.orders.repository.OrderRepository
 import com.mercury.orders.tracing.TracingMetrics
 import org.springframework.stereotype.Service
@@ -105,17 +106,6 @@ class OrderService(
             item.unitPrice.multiply(BigDecimal.valueOf(item.quantity.toLong()))
         }
     }
-}
-
-data class CreateOrderRequest(
-    val customerId: String,
-    val items: List<OrderItemRequest>
-) {
-    data class OrderItemRequest(
-        val sku: String,
-        val quantity: Int,
-        val unitPrice: BigDecimal
-    )
 }
 
 

@@ -5,6 +5,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.kafka:spring-kafka")
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
+    implementation("org.flywaydb:flyway-core")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     
     implementation(project(":common:common-events"))
     implementation(project(":common:common-tracing"))
