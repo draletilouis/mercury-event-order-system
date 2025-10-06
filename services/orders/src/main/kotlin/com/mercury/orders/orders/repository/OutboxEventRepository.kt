@@ -2,18 +2,23 @@ package com.mercury.orders.orders.repository
 
 import com.mercury.orders.orders.domain.OutboxEventEntity
 import com.mercury.orders.events.OutboxEventStatus
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
+import jakarta.persistence.LockModeType
 import java.time.Instant
 import java.util.*
 
 @Repository
 interface OutboxEventRepository : JpaRepository<OutboxEventEntity, UUID> {
     
-    fun findByStatusOrderByCreatedAtAsc(status: OutboxEventStatus): List<OutboxEventEntity>
+    @Query("SELECT e FROM OutboxEventEntity e WHERE e.status = :status ORDER BY e.createdAt ASC")
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    fun findByStatusOrderByCreatedAtAsc(@Param("status") status: OutboxEventStatus, pageable: Pageable): List<OutboxEventEntity>
     
     @Modifying
     @Query("UPDATE OutboxEventEntity e SET e.status = :status, e.publishedAt = :publishedAt WHERE e.id = :id")

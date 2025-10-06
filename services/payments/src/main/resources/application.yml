@@ -37,13 +37,14 @@ spring:
       properties:
         spring.json.trusted.packages: "com.mercury.orders.events"
     producer:
-      key-serializer: org.apache.kafka.common.serialization.StringDeserializer
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       acks: all
       retries: 3
       batch-size: 16384
       linger-ms: 5
       buffer-memory: 33554432
+      enable-idempotence: true
 
 management:
   endpoints:
