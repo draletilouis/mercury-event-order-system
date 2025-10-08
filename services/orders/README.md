@@ -2,7 +2,7 @@
 
 The Orders Service is a core microservice in the Mercury Order System, responsible for managing the complete order lifecycle from creation to completion. It implements event-driven architecture with reliable event publishing using the outbox pattern.
 
-## 🏗️ Architecture
+## Architecture
 
 ### Service Overview
 - **Port**: 8082
@@ -34,7 +34,7 @@ services/orders/
 └── src/test/           # Test classes
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Java 17+
@@ -90,7 +90,7 @@ Profile selection:
 - If you see udev/lsb-release warnings, they are safe to ignore.
 - Use `--no-daemon` if Gradle daemon crashes: `./gradlew :services:orders:build --no-daemon`.
 
-## 📊 Database Schema
+## Database Schema
 
 ### Core Tables
 
@@ -145,7 +145,7 @@ PENDING → PAYMENT_PENDING → INVENTORY_PENDING → COMPLETED
 CANCELLED     CANCELLED        CANCELLED
 ```
 
-## 🔌 API Endpoints
+## API Endpoints
 
 ### Health & Monitoring
 - `GET /api/v1/actuator/health` - Health check endpoint
@@ -178,7 +178,7 @@ CANCELLED     CANCELLED        CANCELLED
 }
 ```
 
-## 🎯 Event-Driven Architecture
+## Event-Driven Architecture
 
 ### Published Events
 The service publishes the following events via Kafka:
@@ -205,7 +205,7 @@ The service implements the transactional outbox pattern to ensure reliable event
 3. Failed events are retried with exponential backoff
 4. Successfully published events are marked as `PUBLISHED`
 
-## ⚙️ Configuration
+## Configuration
 
 ### Environment Variables
 
@@ -242,7 +242,7 @@ The service implements the transactional outbox pattern to ensure reliable event
 - `OUTBOX_MAX_RETRIES`: Maximum retry attempts (default: 3)
 - `OUTBOX_BATCH_SIZE`: Batch size for processing (default: 100)
 
-## 🧪 Testing
+## Testing
 
 ### Running Tests
 ```bash
@@ -265,7 +265,7 @@ The service implements the transactional outbox pattern to ensure reliable event
 ### Test Configuration
 Tests use H2 in-memory database and embedded Kafka for fast execution and isolation.
 
-## 🔍 Monitoring & Observability
+## Monitoring & Observability
 
 ### Metrics
 The service exposes metrics via Prometheus:
@@ -296,7 +296,7 @@ Structured logging with:
 - Configurable log levels per package
 - Centralized error logging
 
-## 🔒 Security
+## Security
 
 ### Authentication & Authorization
 - JWT token validation (when integrated with API Gateway)
@@ -315,7 +315,7 @@ Structured logging with:
 - Security scanning in CI/CD
 - Secret management via environment variables
 
-## 🚀 Deployment
+## Deployment
 
 ### Docker Deployment
 ```bash
@@ -376,7 +376,7 @@ spec:
 - Implement backup strategies
 - Set up disaster recovery procedures
 
-## 🛠️ Development
+## Development
 
 ### Code Style
 - Kotlin coding conventions
@@ -396,7 +396,7 @@ spec:
 - Spring Boot plugin
 - Database plugin for schema management
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
@@ -404,42 +404,31 @@ spec:
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📝 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](../../LICENSE) file for details.
 
-## 📞 Support
+## Support
 
 For questions and support:
 - Create an issue in the repository
 - Contact the development team
 - Check the project documentation in `/docs`
 
-## 🗺️ Roadmap
+## Roadmap
 
 ### Upcoming Features
-- [ ] Order modification support
-- [ ] Bulk order operations
-- [ ] Advanced reporting endpoints
-- [ ] Order scheduling capabilities
-- [ ] Enhanced validation rules
-- [ ] Performance optimizations
+- Order modification support
+- Bulk order operations
+- Advanced reporting endpoints
+- Order scheduling capabilities
+- Enhanced validation rules
+- Performance optimizations
 
 ### Technical Improvements
-- [ ] GraphQL API support
-- [ ] Event sourcing implementation
-- [ ] CQRS pattern adoption
-- [ ] Advanced caching strategies
-- [ ] Circuit breaker implementation
-- [ ] Rate limiting support
-
-
-
-
-
-
-
-
-
-
-
+- GraphQL API support
+- Event sourcing implementation
+- CQRS pattern adoption
+- Advanced caching strategies
+- Circuit breaker implementation
+- Rate limiting support

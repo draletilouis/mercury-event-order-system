@@ -45,6 +45,11 @@ subprojects {
             mavenBom("org.springframework.boot:spring-boot-dependencies:3.3.4")
             mavenBom("org.springframework.cloud:spring-cloud-dependencies:2023.0.3")
         }
+        // Override Flyway version for PostgreSQL 15 compatibility
+        dependencies {
+            dependency("org.flywaydb:flyway-core:10.18.2")
+            dependency("org.flywaydb:flyway-database-postgresql:10.18.2")
+        }
     }
 
     // Testing configuration: ensure JUnit 5 and avoid Gradle 9 no-test failure

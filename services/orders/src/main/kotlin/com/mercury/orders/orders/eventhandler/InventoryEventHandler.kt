@@ -14,8 +14,19 @@ class InventoryEventHandler(
     private val tracingMetrics: TracingMetrics
 ) {
 
-    @KafkaListener(topics = ["inventory-events"], groupId = "orders-service")
-    fun handleInventoryReserved(event: InventoryReservedEvent) {
+    @KafkaListener(
+        topics = ["inventory-events"],
+        groupId = "orders-service",
+        containerFactory = "kafkaListenerContainerFactory"
+    )
+    fun handleInventoryEvent(event: Any) {
+        when (event) {
+            is InventoryReservedEvent -> handleInventoryReserved(event)
+            is InventoryInsufficientEvent -> handleInventoryInsufficient(event)
+        }
+    }
+
+    internal fun handleInventoryReserved(event: InventoryReservedEvent) {
         try {
             val order = orderService.getOrder(event.orderId)
             if (order != null && order.status == OrderStatus.INVENTORY_PENDING) {
@@ -29,8 +40,7 @@ class InventoryEventHandler(
         }
     }
 
-    @KafkaListener(topics = ["inventory-events"], groupId = "orders-service")
-    fun handleInventoryInsufficient(event: InventoryInsufficientEvent) {
+    internal fun handleInventoryInsufficient(event: InventoryInsufficientEvent) {
         try {
             val order = orderService.getOrder(event.orderId)
             if (order != null && order.status == OrderStatus.INVENTORY_PENDING) {
@@ -45,6 +55,11 @@ class InventoryEventHandler(
         }
     }
 }
+
+
+
+
+
 
 
 

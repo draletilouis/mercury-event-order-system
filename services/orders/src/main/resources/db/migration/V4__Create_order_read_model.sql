@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS order_read_model (
     customer_id VARCHAR(255) NOT NULL,
     status VARCHAR(32) NOT NULL,
     total_amount NUMERIC(19,2) NOT NULL,
-    currency CHAR(3) NOT NULL,
+    currency VARCHAR(3) NOT NULL,
     last_event_type VARCHAR(64) NOT NULL,
     last_event_at TIMESTAMP WITH TIME ZONE NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL

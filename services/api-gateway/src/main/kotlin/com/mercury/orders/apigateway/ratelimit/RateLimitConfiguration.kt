@@ -3,6 +3,7 @@ package com.mercury.orders.apigateway.ratelimit
 import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Primary
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
 
@@ -17,7 +18,9 @@ class RateLimitConfiguration {
     /**
      * Key resolver that uses the client IP address for rate limiting.
      * This is useful for limiting requests per IP address.
+     * Marked as @Primary to be the default resolver.
      */
+    @Primary
     @Bean("clientIdKeyResolver")
     fun clientIdKeyResolver(): KeyResolver {
         return KeyResolver { exchange: ServerWebExchange ->
