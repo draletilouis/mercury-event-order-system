@@ -1,7 +1,7 @@
 package com.mercury.orders.orders.exception
 
 import com.fasterxml.jackson.databind.JsonMappingException
-import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
+import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import jakarta.validation.ConstraintViolationException
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -91,13 +91,21 @@ class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException::class)
     fun handleHttpMessageNotReadableException(ex: HttpMessageNotReadableException, request: WebRequest): ResponseEntity<ErrorResponse> {
         logger.warn("Invalid JSON: ${ex.message}", ex)
-        
+
         val message = when (val cause = ex.cause) {
+            is MismatchedInputException -> {
+                // Extract field name from the path if available
+                val fieldName = cause.path.lastOrNull()?.fieldName
+                if (fieldName != null) {
+                    "Missing or invalid required field: $fieldName"
+                } else {
+                    "Invalid JSON format"
+                }
+            }
             is JsonMappingException -> "Invalid JSON format"
-            is MissingKotlinParameterException -> "Missing required field: ${cause.parameter.name}"
             else -> "Invalid request body format"
         }
-         
+
         val errorResponse = ErrorResponse(
             timestamp = Instant.now(),
             status = HttpStatus.BAD_REQUEST.value(),

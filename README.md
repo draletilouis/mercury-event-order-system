@@ -2,7 +2,7 @@
 
 A comprehensive microservices-based order management system built with Kotlin, Spring Boot, and event-driven architecture.
 
-## 🏗️ Architecture Overview
+## Architecture Overview
 
 The Mercury Order System implements a distributed saga pattern with the following microservices:
 
@@ -11,32 +11,33 @@ The Mercury Order System implements a distributed saga pattern with the followin
 - **Payments Service** (Port 8083) - Payment authorization and processing
 - **Inventory Service** (Port 8081) - Stock reservation and management
 
-## 🚀 Tech Stack
+## Technology Stack
 
 - **Language**: Kotlin + Spring Boot 3.3.4
-- **Database**: PostgreSQL (AWS RDS compatible)
-- **Caching**: Redis
-- **Messaging**: Apache Kafka
+- **Database**: PostgreSQL 15+ (AWS RDS compatible) with Flyway migrations
+- **Caching**: Redis 7+ with connection pooling
+- **Messaging**: Apache Kafka 3.5+ with idempotent producers
 - **Infrastructure**: Docker, Kubernetes-ready
 - **Observability**: OpenTelemetry, Prometheus, Grafana, Jaeger
-- **Build Tool**: Gradle with multi-module setup
+- **Build Tool**: Gradle 8+ with multi-module setup
+- **Resilience**: Outbox pattern for reliable event publishing
 
-## 📊 System Flow
+## System Flow
 
 ### Order Creation Saga
-1. **OrderCreated** → Orders service creates order in PENDING status
-2. **PaymentAuthorized** → Payments service authorizes payment
-3. **InventoryReserved** → Inventory service reserves stock
-4. **OrderCompleted** → Orders service marks order as COMPLETED
+1. **OrderCreated** - Orders service creates order in PENDING status
+2. **PaymentAuthorized** - Payments service authorizes payment
+3. **InventoryReserved** - Inventory service reserves stock
+4. **OrderCompleted** - Orders service marks order as COMPLETED
 
 ### Compensation Flow
 If any step fails:
-- **PaymentDeclined** → Orders service cancels order
-- **InventoryInsufficient** → Orders service cancels order
-- **PaymentReversed** → Compensate for successful payment
-- **InventoryReleased** → Compensate for successful reservation
+- **PaymentDeclined** - Orders service cancels order
+- **InventoryInsufficient** - Orders service cancels order
+- **PaymentReversed** - Compensate for successful payment
+- **InventoryReleased** - Compensate for successful reservation
 
-## 🛠️ Getting Started
+## Getting Started
 
 ### Prerequisites
 - Docker and Docker Compose
@@ -44,11 +45,11 @@ If any step fails:
 - Gradle 8+
 - Optional for WSL users: `libudev-dev` and `lsb-release` for cleaner system info (warnings are harmless if missing)
 
-### Quick Start (WSL-friendly)
+### Quick Start
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/yourusername/mercury-order-system.git
    cd mercury-order-system
    ```
 
@@ -59,10 +60,10 @@ If any step fails:
 
 3. **Build and run services**
    ```bash
-   # From a WSL terminal
-   ./gradlew clean build
+   # Build all services
+   ./gradlew build -x test
 
-   # Run all services via Docker Compose (recommended for local integration)
+   # Run all services via Docker Compose (recommended)
    docker-compose up -d api-gateway orders-service payments-service inventory-service
    ```
 
@@ -100,25 +101,30 @@ To run with a Spring profile (e.g., dev):
 ./gradlew :services:orders:bootRun -Dspring.profiles.active=dev
 ```
 
-## 📡 API Endpoints
+## API Endpoints
 
 ### API Gateway (Port 8080)
 - `GET /health` - Health check endpoint
 - `GET /health/ready` - Readiness probe
 - `GET /health/live` - Liveness probe
-- `GET /api/orders/{orderId}` - Get order details (routed to Orders service)
-- `POST /api/orders` - Create new order (routed to Orders service)
-- `GET /api/orders/customer/{customerId}` - Get customer orders (routed to Orders service)
-- `POST /api/orders/{orderId}/cancel` - Cancel order (routed to Orders service)
-- `GET /api/payments/{paymentId}` - Get payment details (routed to Payments service)
-- `GET /api/inventory/{sku}` - Get inventory details (routed to Inventory service)
+- `GET /api/orders/{orderId}` - Get order details
+- `POST /api/orders` - Create new order
+- `GET /api/orders/customer/{customerId}` - Get customer orders
+- `POST /api/orders/{orderId}/cancel` - Cancel order
+- `GET /api/payments/{paymentId}` - Get payment details
+- `GET /api/payments/order/{orderId}` - Get payments by order
+- `POST /api/payments` - Create/authorize payment
+- `POST /api/payments/{paymentId}/reverse` - Reverse payment
+- `GET /api/inventory/{sku}` - Get inventory details
+- `POST /api/inventory/reserve` - Reserve inventory
+- `POST /api/inventory/release` - Release reservation
 
 ### Direct Service Access
 - **Orders**: http://localhost:8082
 - **Payments**: http://localhost:8083  
 - **Inventory**: http://localhost:8081
 
-## 🗄️ Database Schema
+## Database Schema
 
 Each service maintains its own PostgreSQL database:
 
@@ -129,7 +135,7 @@ Each service maintains its own PostgreSQL database:
 
 See [docs/database-schema.md](docs/database-schema.md) for detailed schema information.
 
-## 📈 Observability
+## Observability
 
 ### Metrics & Monitoring
 - **Prometheus**: http://localhost:9090
@@ -142,42 +148,42 @@ All services expose health endpoints:
 - `/actuator/metrics` - Application metrics
 - `/actuator/prometheus` - Prometheus metrics
 
-## 🌐 API Gateway Features
+## API Gateway Features
 
 The API Gateway provides enterprise-grade capabilities:
 
-### **Routing & Load Balancing**
+### Routing & Load Balancing
 - Intelligent routing to backend services
 - Load balancing across service instances
 - Path-based routing with strip prefix
 
-### **Rate Limiting**
+### Rate Limiting
 - Redis-based rate limiting (10 req/sec, burst of 20)
 - Multiple rate limiting strategies:
   - IP-based limiting
   - User-Agent + IP combination
   - User ID-based limiting (for authenticated users)
 
-### **Health Monitoring**
+### Health Monitoring
 - Health check endpoint (`/health`)
 - Readiness probe (`/health/ready`) for Kubernetes
 - Liveness probe (`/health/live`) for container orchestration
 
-### **Request Logging**
+### Request Logging
 - Comprehensive request/response logging
 - Performance timing metrics
 - Error tracking and monitoring
 
-### **CORS Support**
+### CORS Support
 - Pre-configured for frontend applications
 - Configurable allowed origins, methods, and headers
 
-### **Observability**
+### Observability
 - Prometheus metrics integration
 - OpenTelemetry distributed tracing
 - Request correlation IDs
 
-## 🔄 Event Flow
+## Event Flow
 
 The system uses Apache Kafka for event-driven communication:
 
@@ -191,7 +197,7 @@ The system uses Apache Kafka for event-driven communication:
 - `PaymentAuthorized`, `PaymentDeclined`, `PaymentReversed`
 - `InventoryReserved`, `InventoryInsufficient`, `InventoryReleased`
 
-## 🔍 Read Models and Replay
+## Read Models and Replay
 
 The Orders service maintains a separate query-optimized read model that is updated by event handlers and can be fully rebuilt via replay.
 
@@ -210,20 +216,19 @@ Notes:
 - Idempotent upserts ensure safe reprocessing
 - Consider pausing read-model consumers during maintenance for consistent rebuilds
 
-## 📊 Service Status
+## Service Status
 
 | Service | Status | Port | Features |
 |---------|--------|------|----------|
-| **API Gateway** | ✅ **Fully Functional** | 8080 | Routing, Rate Limiting, Health Checks, Logging |
-| **Orders Service** | ✅ **Fully Functional** | 8082 | Event Sourcing, Read Models, Saga Management |
-| **Payments Service** | 🟡 **Partial** | 8083 | Domain Model, Event Handling (needs API layer) |
-| **Inventory Service** | 🟡 **Partial** | 8081 | Domain Model, Metrics (needs API layer) |
+| **API Gateway** | Fully Functional | 8080 | Routing, Rate Limiting, Health Checks, Logging |
+| **Orders Service** | Fully Functional | 8082 | Event Sourcing, Read Models, Saga Management |
+| **Payments Service** | Fully Functional | 8083 | Payment Authorization, Event Publishing |
+| **Inventory Service** | Fully Functional | 8081 | Stock Management, Reservation System |
 
-### **Legend**
-- ✅ **Fully Functional**: Complete with API, business logic, and testing
-- 🟡 **Partial**: Core functionality implemented, needs API layer completion
+### Legend
+- **Fully Functional**: Complete with API, business logic, and testing
 
-## 🏗️ Project Structure
+## Project Structure
 
 ```
 mercury-order-system/
@@ -231,17 +236,17 @@ mercury-order-system/
 │   ├── common-events/          # Shared event definitions
 │   └── common-tracing/         # OpenTelemetry configuration
 ├── services/
-│   ├── api-gateway/           # ✅ API Gateway service (fully functional)
-│   ├── orders/                # ✅ Orders service (fully functional)
-│   ├── payments/              # 🟡 Payments service (partial)
-│   └── inventory/             # 🟡 Inventory service (partial)
+│   ├── api-gateway/           # API Gateway service
+│   ├── orders/                # Orders service
+│   ├── payments/              # Payments service
+│   └── inventory/             # Inventory service
 ├── docs/                      # Documentation
 ├── scripts/                   # Database initialization
 ├── monitoring/                # Observability configs
 └── docker-compose.yml         # Infrastructure setup
 ```
 
-## 🧪 Testing
+## Testing
 
 ### Unit Tests
 ```bash
@@ -260,7 +265,7 @@ ab -n 1000 -c 10 -H "Content-Type: application/json" \
    -p order-request.json http://localhost:8080/api/orders
 ```
 
-## 🚀 Deployment
+## Deployment
 
 ### Docker
 ```bash
@@ -296,7 +301,7 @@ terraform plan
 terraform apply
 ```
 
-## 🔧 Configuration
+## Configuration
 
 ### Environment Variables
 - `DB_USERNAME` / `DB_PASSWORD` - Database credentials
@@ -311,12 +316,12 @@ Each service has its own `application.yml` with:
 - Redis configuration
 - Observability settings
 
-## 📚 Additional Documentation
+## Additional Documentation
 
 - [Database Schema](docs/database-schema.md)
 - [Monitoring stack configuration](monitoring/)
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch
@@ -324,11 +329,11 @@ Each service has its own `application.yml` with:
 4. Add tests
 5. Submit a pull request
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 🆘 Support
+## Support
 
 For questions and support:
 - Create an issue in the repository
@@ -337,16 +342,16 @@ For questions and support:
 
 ---
 
-## 🧰 Troubleshooting (WSL/Windows)
+## Troubleshooting (WSL/Windows)
 
-### **General Issues**
+### General Issues
 - Did not find udev library / File not found: `/etc/lsb-release`:
   - Harmless in WSL. Optionally install: `sudo apt-get update && sudo apt-get install -y libudev-dev lsb-release`.
 - Gradle daemon crashes or file-lock issues on Windows:
   - Retry with `./gradlew clean build --no-daemon` inside WSL.
   - Ensure the project is built from WSL path (`/mnt/c/...`) and not from Windows PowerShell at the same time.
 
-### **Infrastructure Issues**
+### Infrastructure Issues
 - Kafka/Redis/Postgres connection refused:
   - Ensure `docker-compose ps` shows containers healthy and ports exposed.
   - Check service `application.yml` hosts/ports match compose (usually `localhost` in WSL).
@@ -355,7 +360,7 @@ For questions and support:
 - Database migrations fail:
   - Confirm DB containers are up; re-run `./gradlew :services:<svc>:bootRun` after infra is ready.
 
-### **API Gateway Issues**
+### API Gateway Issues
 - API Gateway won't start:
   - Check Redis connectivity: `telnet localhost 6379`
   - Verify port 8080 is available: `netstat -ano | findstr :8080`

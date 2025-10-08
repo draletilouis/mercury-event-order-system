@@ -13,6 +13,7 @@ dependencies {
     // Database
     runtimeOnly("org.postgresql:postgresql")
     implementation("org.flywaydb:flyway-core")
+    implementation("org.flywaydb:flyway-database-postgresql")
     
     // Kafka for event streaming
     implementation("org.springframework.kafka:spring-kafka")

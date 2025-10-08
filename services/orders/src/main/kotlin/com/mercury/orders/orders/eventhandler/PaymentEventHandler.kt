@@ -1,6 +1,5 @@
 package com.mercury.orders.orders.eventhandler
 
-import com.mercury.orders.events.EventHandler
 import com.mercury.orders.events.PaymentAuthorizedEvent
 import com.mercury.orders.events.PaymentDeclinedEvent
 import com.mercury.orders.orders.domain.OrderStatus
@@ -15,8 +14,19 @@ class PaymentEventHandler(
     private val tracingMetrics: TracingMetrics
 ) {
 
-    @KafkaListener(topics = ["payment-events"], groupId = "orders-service")
-    fun handlePaymentAuthorized(event: PaymentAuthorizedEvent) {
+    @KafkaListener(
+        topics = ["payment-events"],
+        groupId = "orders-service",
+        containerFactory = "kafkaListenerContainerFactory"
+    )
+    fun handlePaymentEvent(event: Any) {
+        when (event) {
+            is PaymentAuthorizedEvent -> handlePaymentAuthorized(event)
+            is PaymentDeclinedEvent -> handlePaymentDeclined(event)
+        }
+    }
+
+    internal fun handlePaymentAuthorized(event: PaymentAuthorizedEvent) {
         try {
             val order = orderService.getOrder(event.orderId)
             if (order != null && order.status == OrderStatus.PAYMENT_PENDING) {
@@ -30,8 +40,7 @@ class PaymentEventHandler(
         }
     }
 
-    @KafkaListener(topics = ["payment-events"], groupId = "orders-service")
-    fun handlePaymentDeclined(event: PaymentDeclinedEvent) {
+    internal fun handlePaymentDeclined(event: PaymentDeclinedEvent) {
         try {
             val order = orderService.getOrder(event.orderId)
             if (order != null && order.status == OrderStatus.PAYMENT_PENDING) {
@@ -45,6 +54,11 @@ class PaymentEventHandler(
         }
     }
 }
+
+
+
+
+
 
 
 

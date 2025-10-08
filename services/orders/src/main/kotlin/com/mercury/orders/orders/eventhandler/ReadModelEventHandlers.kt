@@ -9,26 +9,42 @@ import org.springframework.stereotype.Component
 class ReadModelEventHandlers(
     private val projector: OrderReadModelProjector
 ) {
-    @KafkaListener(topics = ["order-events"], groupId = "orders-read-model")
-    fun onOrderCreated(event: OrderCreatedEvent) = projector.on(event)
+    @KafkaListener(
+        topics = ["order-events"],
+        groupId = "orders-read-model",
+        containerFactory = "kafkaListenerContainerFactory"
+    )
+    fun handleOrderEvent(event: Any) {
+        when (event) {
+            is OrderCreatedEvent -> projector.on(event)
+            is OrderCompletedEvent -> projector.on(event)
+            is OrderCancelledEvent -> projector.on(event)
+        }
+    }
 
-    @KafkaListener(topics = ["payment-events"], groupId = "orders-read-model")
-    fun onPaymentAuthorized(event: PaymentAuthorizedEvent) = projector.on(event)
+    @KafkaListener(
+        topics = ["payment-events"],
+        groupId = "orders-read-model",
+        containerFactory = "kafkaListenerContainerFactory"
+    )
+    fun handlePaymentEvent(event: Any) {
+        when (event) {
+            is PaymentAuthorizedEvent -> projector.on(event)
+            is PaymentDeclinedEvent -> projector.on(event)
+        }
+    }
 
-    @KafkaListener(topics = ["payment-events"], groupId = "orders-read-model")
-    fun onPaymentDeclined(event: PaymentDeclinedEvent) = projector.on(event)
-
-    @KafkaListener(topics = ["inventory-events"], groupId = "orders-read-model")
-    fun onInventoryReserved(event: InventoryReservedEvent) = projector.on(event)
-
-    @KafkaListener(topics = ["inventory-events"], groupId = "orders-read-model")
-    fun onInventoryInsufficient(event: InventoryInsufficientEvent) = projector.on(event)
-
-    @KafkaListener(topics = ["order-events"], groupId = "orders-read-model")
-    fun onOrderCompleted(event: OrderCompletedEvent) = projector.on(event)
-
-    @KafkaListener(topics = ["order-events"], groupId = "orders-read-model")
-    fun onOrderCancelled(event: OrderCancelledEvent) = projector.on(event)
+    @KafkaListener(
+        topics = ["inventory-events"],
+        groupId = "orders-read-model",
+        containerFactory = "kafkaListenerContainerFactory"
+    )
+    fun handleInventoryEvent(event: Any) {
+        when (event) {
+            is InventoryReservedEvent -> projector.on(event)
+            is InventoryInsufficientEvent -> projector.on(event)
+        }
+    }
 }
 
 

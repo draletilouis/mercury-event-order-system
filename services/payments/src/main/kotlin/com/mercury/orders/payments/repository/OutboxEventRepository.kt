@@ -71,3 +71,8 @@ interface OutboxEventRepository : JpaRepository<OutboxEventEntity, UUID> {
 
 
 
+
+
+
+
+

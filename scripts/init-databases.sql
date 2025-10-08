@@ -23,18 +23,23 @@ GRANT ALL PRIVILEGES ON DATABASE gateway_db TO gateway_user;
 -- Connect to each database and create schemas
 \c orders_db;
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+GRANT ALL ON SCHEMA public TO orders_user;
 
 \c orders_dev_db;
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+GRANT ALL ON SCHEMA public TO orders_user;
 
 \c payments_db;
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+GRANT ALL ON SCHEMA public TO payments_user;
 
 \c inventory_db;
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+GRANT ALL ON SCHEMA public TO inventory_user;
 
 \c gateway_db;
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+GRANT ALL ON SCHEMA public TO gateway_user;
 
 
 
