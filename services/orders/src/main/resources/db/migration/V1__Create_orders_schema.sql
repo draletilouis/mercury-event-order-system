@@ -1,8 +1,7 @@
 -- Orders Service Database Schema
 -- Version 1: Initial schema creation
 
--- Enable UUID extension
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- Orders table
 CREATE TABLE orders (
@@ -48,7 +47,7 @@ CREATE INDEX idx_outbox_events_status ON outbox_events(status);
 CREATE INDEX idx_outbox_events_created_at ON outbox_events(created_at);
 
 -- Function to automatically update updated_at timestamp
-CREATE OR REPLACE FUNaCTION update_updated_at_column()
+CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
     NEW.updated_at = NOW();

@@ -1,0 +1,81 @@
+# Fast startup profile for local development
+# Disables heavy features for 2-3x faster startup
+
+spring:
+  main:
+    lazy-initialization: true  # Lazy load beans for faster startup
+  
+  datasource:
+    url: jdbc:postgresql://localhost:5432/orders_db
+    username: orders_user
+    password: orders_pass
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 1
+      initialization-fail-timeout: -1  # Don't wait for connection on startup
+  
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          batch_size: 10
+  
+  flyway:
+    enabled: true
+    validate-on-migrate: false  # Skip validation for faster startup
+  
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: orders-service-fast
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+    producer:
+      acks: 1
+      retries: 1
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health  # Only health endpoint
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: false  # Disable Prometheus
+  tracing:
+    enabled: false  # Disable OpenTelemetry tracing - BIG speedup!
+  otlp:
+    tracing:
+      enabled: false
+
+logging:
+  level:
+    root: WARN
+    com.mercury.orders: INFO
+    org.springframework: WARN
+    org.springframework.boot: WARN
+    org.springframework.kafka: WARN
+    org.hibernate: WARN
+    org.hibernate.SQL: WARN
+    io.opentelemetry: ERROR  # Silence OpenTelemetry
+    org.apache.kafka: WARN
+  pattern:
+    console: "%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n"  # Simpler log format
+
+app:
+  version: 0.1.0-fast
+  outbox:
+    polling-interval: 5000
+    retry-interval: 15000
+    cleanup-interval: 900000
+    max-retries: 3
+    batch-size: 50
+

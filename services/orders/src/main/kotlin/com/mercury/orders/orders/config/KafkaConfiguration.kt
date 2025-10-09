@@ -50,7 +50,9 @@ class KafkaConfiguration {
             ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
             ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to JsonDeserializer::class.java,
             ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "earliest",
-            ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG to false
+            ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG to false,
+            JsonDeserializer.TRUSTED_PACKAGES to "com.mercury.orders.events",
+            JsonDeserializer.USE_TYPE_INFO_HEADERS to "false"
         )
         
         val jsonDeserializer = JsonDeserializer<DomainEvent>(DomainEvent::class.java)
@@ -68,6 +70,9 @@ class KafkaConfiguration {
         return factory
     }
 }
+
+
+
 
 
 
