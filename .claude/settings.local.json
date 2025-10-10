@@ -3,7 +3,12 @@
     "allow": [
       "Bash(docker restart:*)",
       "Bash(docker start:*)",
-      "Bash(docker ps:*)"
+      "Bash(docker ps:*)",
+      "Bash(docker-compose build:*)",
+      "Bash(DOCKER_API_VERSION=1.41 docker ps)",
+      "Bash(/mnt/c/Program Files/Docker/Docker/resources/bin/docker.exe ps)",
+      "Bash(\"/c/Program Files/Docker/Docker/resources/bin/docker\" info)",
+      "Bash(wsl ./gradlew:*)"
     ],
     "deny": [],
     "ask": []

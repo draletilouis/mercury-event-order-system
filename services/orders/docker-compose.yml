@@ -7,7 +7,8 @@ services:
     ports:
       - "8082:8082"
     environment:
-      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_PROFILES_ACTIVE=fast
+      - SPRING_MAIN_LAZY_INITIALIZATION=true
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_NAME=orders_db
